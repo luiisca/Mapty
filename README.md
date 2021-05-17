@@ -1,6 +1,6 @@
 # 🗺️Mapty ![Status badge](https://img.shields.io/badge/status-completed-green)
 
-In this project I'm going to build a modern and styleful Map app . I hope you enjoy reading it almost as much as I enjoy building it.
+In this project I'm going to build a modern and styleful Map app. I hope you enjoy using it almost as much as I enjoy building it.
 
 ### Functionalities
 
