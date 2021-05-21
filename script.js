@@ -46,7 +46,6 @@ class Running extends Workout {
     super(distance, duration, coords);
     this.cadence = cadence;
     this.calcPace();
-    // this._workoutDate();
   }
 
   calcPace() {
@@ -60,7 +59,6 @@ class Cycling extends Workout {
     super(distance, duration, coords);
     this.elevationGain = elevationGain;
     this.calcSpeed();
-    // this._workoutDate();
   }
 
   calcSpeed() {
@@ -108,7 +106,16 @@ class App {
     this.#mapEvent = mapE;
     form.classList.remove('hidden');
   }
-
+  _hideForm() {
+    inputDistance.value =
+      inputCadence.value =
+      inputDuration.value =
+      inputElevation.value =
+        '';
+    form.style.display = 'none';
+    form.classList.add('hidden');
+    setTimeout(() => (form.style.display = 'grid'), 100);
+  }
   _toggleElevationField() {
     inputCadence.closest('.form__row').classList.toggle('form__row--hidden');
     inputElevation.closest('.form__row').classList.toggle('form__row--hidden');
@@ -155,12 +162,8 @@ class App {
     this._renderWorkoutMarker(workout);
     //create new workout boxes
     this._renderWorkout(workout);
-    //clean the inputs
-    inputDistance.value =
-      inputCadence.value =
-      inputDuration.value =
-      inputElevation.value =
-        '';
+    //hide the form
+    this._hideForm();
   }
   _renderWorkoutMarker(workout) {
     L.marker(workout.coords)
@@ -174,7 +177,9 @@ class App {
           className: `${workout.type}-popup`,
         })
       )
-      .setPopupContent(workout.distance + ' meters')
+      .setPopupContent(
+        `${workout.type === 'running' ? '🏃‍♂️' : '🚴‍♀️'}${workout.workoutDate()}`
+      )
       .openPopup();
   }
   _renderWorkout(workout) {
@@ -203,7 +208,7 @@ class App {
           </div>
           <div class="workout__details">
             <span class="workout__icon">🦶🏼</span>
-            <span class="workout__value">${workout.pace}</span>
+            <span class="workout__value">${workout.pace.toFixed(1)}</span>
             <span class="workout__unit">spm</span>
           </div>
         </li>
