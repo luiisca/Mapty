@@ -10,7 +10,7 @@ In this project I'm going to build a modern and styleful Map app. I hope you enj
 
 ## 🚀DEMO
 
-If you want to break your sedentary lifestyle you can visit this [Mapty app](https://luiscadillo.github.io/Mapty/#) (powered by GitHub pages btw)
+If you want to break your sedentary lifestyle you can visit this [Mapty app](https://luiisca.github.io/Mapty/) (powered by GitHub pages btw)
 
 ## ✨Gratitude
 
