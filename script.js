@@ -36,9 +36,8 @@ class Workout {
       'November',
       'December',
     ];
-    this.workoutDate = `${this.type[0].toUpperCase()}${this.type.slice(1)} on ${
-      months[this.date.getMonth()]
-    } ${this.date.getDay()}`;
+    this.workoutDate = `${this.type[0].toUpperCase()}${this.type.slice(1)} on ${months[this.date.getMonth()]
+      } ${this.date.getDay()}`;
   }
   addClick() {
     this.clicks++;
@@ -89,11 +88,11 @@ class App {
     //load local data
     this._loadData();
   }
-  _getPosition = function () {
+  _getPosition = function() {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         this._loadMap.bind(this),
-        function () {
+        function() {
           alert('can not acces to location, please reactivate GPS');
         }
       );
@@ -129,7 +128,7 @@ class App {
       inputCadence.value =
       inputDuration.value =
       inputElevation.value =
-        '';
+      '';
     form.style.display = 'none';
     form.classList.add('hidden');
     setTimeout(() => (form.style.display = 'grid'), 1000);
@@ -208,9 +207,8 @@ class App {
         <li class="workout workout--${workout.type}" data-id="${workout.id}">
           <h2 class="workout__title">${workout.workoutDate}</h2>
           <div class="workout__details">
-            <span class="workout__icon">${
-              workout.type === 'running' ? '🏃‍♂️' : '🚴‍♀️'
-            }</span>
+            <span class="workout__icon">${workout.type === 'running' ? '🏃‍♂️' : '🚴‍♀️'
+      }</span>
             <span class="workout__value">${workout.distance}</span>
             <span class="workout__unit">km</span>
           </div>
@@ -245,8 +243,8 @@ class App {
           <div class="workout__details">
             <span class="workout__icon">⛰</span>
             <span class="workout__value">${workout.elevationGain.toFixed(
-              1
-            )}</span>
+        1
+      )}</span>
             <span class="workout__unit">m</span>
           </div>
       `;
