@@ -77,16 +77,21 @@ class App {
   #map;
   #mapEvent;
   #workouts = [];
-  #coords;
+  #coords = COORDS;
   #zoomLevelPopup = 13;
   constructor() {
-    this._getPosition(); //this = App
-    form.addEventListener('submit', this._newWorkout.bind(this));
+    this._updateHistory();
+    this._loadMap.bind(this)(),
+      // this._getPosition(); //this = App
+      form.addEventListener('submit', this._newWorkout.bind(this));
     inputType.addEventListener('change', this._toggleElevationField);
     containerWorkouts.addEventListener('click', this._moveToPopup.bind(this));
 
     //load local data
     this._loadData();
+  }
+  _updateHistory() {
+    window.history.pushState({}, "", `@${COORDS[0]},${COORDS[1]}`);
   }
   _getPosition = function() {
     if (navigator.geolocation) {
@@ -99,10 +104,13 @@ class App {
     }
   };
 
-  _loadMap(position) {
-    const { latitude } = position.coords; //give user's location
-    const { longitude } = position.coords;
-    this.#coords = [latitude, longitude];
+  /**
+    * @param {[number, number] | undefined} coords
+    */
+  _loadMap(coords) {
+    if (coords) {
+      this.#coords = coords;
+    }
 
     this.#map = L.map('map').setView(this.#coords, this.#zoomLevelPopup); //generate the map
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -282,4 +290,4 @@ class App {
     location.reload();
   }
 }
-const test = new App();
+new App();
