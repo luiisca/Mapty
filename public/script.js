@@ -17,7 +17,9 @@ const LOCATE_ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="
 class Workout {
   id = (Date.now() + '').slice(-10);
   date = new Date();
-  workoutDate;
+  formattedDate;
+  cardTitle;
+  popupTitle;
   clicks = 0;
   /**
     * @param {number} distance
@@ -28,7 +30,11 @@ class Workout {
     this.distance = distance;
     this.duration = duration;
     this.coords = coords;
+    this.calcDate();
+    this.setPopupTitle();
+    this.setCardTitle();
   }
+
   calcDate() {
     const months = [
       'January',
@@ -44,7 +50,13 @@ class Workout {
       'November',
       'December',
     ];
-    this.workoutDate = `${this.distance}km, ${this.duration}m - ${months[this.date.getMonth()]} ${this.date.getDate()}, ${this.date.getFullYear()}`;
+    this.formattedDate = `${months[this.date.getMonth()]} ${this.date.getDate()}, ${this.date.getFullYear()}`;
+  }
+  setPopupTitle() {
+    this.popupTitle = `${this.type === 'running' ? '🏃‍♂️' : '🚴‍♀️'}${this.distance}km in ${this.duration}min — ${this.formattedDate}`
+  }
+  setCardTitle() {
+    this.cardTitle = `${this.type === 'running' ? 'Running' : 'Cycling'} on ${this.formattedDate}`
   }
   addClick() {
     this.clicks++;
@@ -57,7 +69,6 @@ class Running extends Workout {
     super(distance, duration, coords);
     this.cadence = cadence;
     this.calcPace();
-    this.calcDate();
   }
 
   calcPace() {
@@ -71,7 +82,6 @@ class Cycling extends Workout {
     super(distance, duration, coords);
     this.elevationGain = elevationGain;
     this.calcSpeed();
-    this.calcDate();
   }
 
   calcSpeed() {
@@ -268,16 +278,14 @@ class App {
       .addTo(this.#map)
       .bindPopup(
         L.popup({
-          maxWidth: 250,
+          maxWidth: 300,
           minWidth: 100,
           autoClose: false,
           closeOnClick: false,
           className: `${workout.type}-popup`,
         })
       )
-      .setPopupContent(
-        `${workout.type === 'running' ? '🏃‍♂️' : '🚴‍♀️'}${workout.workoutDate}`
-      )
+      .setPopupContent(workout.popupTitle)
       .openPopup();
   }
 
@@ -295,16 +303,14 @@ class App {
         className: `${workout.type}-popup`,
       })
     )
-      .setPopupContent(
-        `${workout.type === 'running' ? '🏃‍♂️' : '🚴‍♀️'}${workout.workoutDate}`
-      )
+      .setPopupContent(workout.popupTitle)
       .openPopup();
   }
 
   _renderWorkout(workout) {
     let html = `
         <li class="workout workout--${workout.type}" data-id="${workout.id}">
-          <h2 class="workout__title">${workout.workoutDate}</h2>
+          <h2 class="workout__title">${workout.cardTitle}</h2>
           <div class="workout__details">
             <span class="workout__icon">${workout.type === 'running' ? '🏃‍♂️' : '🚴‍♀️'
       }</span>
