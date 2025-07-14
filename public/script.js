@@ -1,8 +1,8 @@
 'use strict';
 
-// prettier-ignore
-const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-
+const locationBttn = document.querySelector('.location-btn');
+const popover = document.querySelector('.popover');
+const toast = document.querySelector('.toast');
 const form = document.querySelector('.form');
 const containerWorkouts = document.querySelector('.workouts');
 const inputType = document.querySelector('.form__input--type');
@@ -10,6 +10,9 @@ const inputDistance = document.querySelector('.form__input--distance');
 const inputDuration = document.querySelector('.form__input--duration');
 const inputCadence = document.querySelector('.form__input--cadence');
 const inputElevation = document.querySelector('.form__input--elevation');
+
+const LOCATE_FIXED_ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-locate-fixed-icon lucide-locate-fixed"><line x1="2" x2="5" y1="12" y2="12"/><line x1="19" x2="22" y1="12" y2="12"/><line x1="12" x2="12" y1="2" y2="5"/><line x1="12" x2="12" y1="19" y2="22"/><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="3"/></svg>`;
+const LOCATE_ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-locate-icon lucide-locate"><line x1="2" x2="5" y1="12" y2="12"/><line x1="19" x2="22" y1="12" y2="12"/><line x1="12" x2="12" y1="2" y2="5"/><line x1="12" x2="12" y1="19" y2="22"/><circle cx="12" cy="12" r="7"/></svg>`;
 
 class Workout {
   id = (Date.now() + '').slice(-10);
@@ -71,7 +74,6 @@ class Cycling extends Workout {
     this.speed = this.distance / (this.duration / 60);
   }
 }
-const run1 = new Running(10, 20, [23, -23], 100);
 
 class App {
   #map;
@@ -79,26 +81,68 @@ class App {
   #workouts = [];
   #coords = COORDS;
   #zoomLevelPopup = 13;
+  #pulsateInterval;
+
   constructor() {
     this._updateHistory();
-    this._loadMap.bind(this)(),
-      // this._getPosition(); //this = App
-      form.addEventListener('submit', this._newWorkout.bind(this));
+    this._loadMap.bind(this)();
+    this._setInitialPopover();
+
+    locationBttn.addEventListener('click', this._getPosition.bind(this));
+    form.addEventListener('submit', this._newWorkout.bind(this));
     inputType.addEventListener('change', this._toggleElevationField);
     containerWorkouts.addEventListener('click', this._moveToPopup.bind(this));
 
-    //load local data
     this._loadData();
   }
+
   _updateHistory() {
-    window.history.pushState({}, "", `@${COORDS[0]},${COORDS[1]}`);
+    if (COORDS.length > 0) {
+      window.history.pushState({}, "", `@${COORDS[0]},${COORDS[1]}`);
+    }
   }
-  _getPosition = function() {
+
+  _setInitialPopover() {
+    popover.textContent = 'Get your current location';
+  }
+
+  _showToast(message) {
+    toast.textContent = message;
+    toast.classList.remove('hidden');
+    setTimeout(() => {
+      toast.classList.add('hidden');
+    }, 3000);
+  }
+
+  _startLoading() {
+    locationBttn.classList.add('loading');
+    popover.textContent = 'Getting your location';
+
+    let iconState = 0;
+    this.#pulsateInterval = setInterval(() => {
+      locationBttn.innerHTML = iconState % 2 === 0 ? LOCATE_ICON : LOCATE_FIXED_ICON;
+      iconState++;
+    }, 500);
+  }
+
+  _stopLoading() {
+    locationBttn.classList.remove('loading');
+    clearInterval(this.#pulsateInterval);
+    locationBttn.innerHTML = LOCATE_FIXED_ICON;
+    this._setInitialPopover();
+  }
+
+  _getPosition() {
     if (navigator.geolocation) {
+      this._startLoading();
       navigator.geolocation.getCurrentPosition(
-        this._loadMap.bind(this),
-        function() {
-          alert('can not acces to location, please reactivate GPS');
+        (position) => {
+          this._updateMap(position);
+          this._stopLoading();
+        },
+        () => {
+          this._stopLoading();
+          this._showToast('Failed to get your location.');
         }
       );
     }
@@ -112,13 +156,13 @@ class App {
       this.#coords = coords;
     }
 
-    this.#map = L.map('map').setView(this.#coords, this.#zoomLevelPopup); //generate the map
+    this.#map = L.map('map').setView(this.#coords, this.#zoomLevelPopup);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution:
         '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     }).addTo(this.#map);
     this.#map.on('click', this._showForm.bind(this));
-    //load markers with saved data
+
     if (this.#workouts) {
       this.#workouts.forEach(work => {
         this._renderWorkoutMarker(work);
@@ -126,11 +170,25 @@ class App {
     }
   }
 
+  /**
+    * @param {GeolocationPosition} position
+    */
+  _updateMap(position) {
+    const coords = [position.coords.latitude, position.coords.longitude];
+    this.#map.setView(coords, this.#zoomLevelPopup, {
+      animate: true,
+      pan: {
+        duration: 1,
+      },
+    });
+  }
+
   _showForm(mapE) {
     inputDistance.focus();
     this.#mapEvent = mapE;
     form.classList.remove('hidden');
   }
+
   _hideForm() {
     inputDistance.value =
       inputCadence.value =
@@ -141,6 +199,7 @@ class App {
     form.classList.add('hidden');
     setTimeout(() => (form.style.display = 'grid'), 1000);
   }
+
   _toggleElevationField() {
     inputCadence.closest('.form__row').classList.toggle('form__row--hidden');
     inputElevation.closest('.form__row').classList.toggle('form__row--hidden');
@@ -153,34 +212,26 @@ class App {
     const duration = +inputDuration.value;
     const { lat, lng } = this.#mapEvent.latlng;
     let workout;
-    //functions
+
     const isNumber = (...inputs) => inputs.every(inp => Number.isFinite(inp));
     const isPositive = (...inputs) => inputs.every(inp => inp > 0);
 
-    //guard statements
     if (type === 'running') {
       const cadence = +inputCadence.value;
       if (!isPositive(distance, duration, cadence)) {
-        return alert(
-          'You can only introduce positive numbers, nor negative nor empty'
-        );
+        return this._showToast('Inputs have to be positive numbers.');
       }
-      //create the instance
       workout = new Running(distance, duration, [lat, lng], cadence);
     }
+
     if (type === 'cycling') {
       const elevation = +inputElevation.value;
-      if (
-        !isNumber(distance, duration, elevation) ||
-        !isPositive(distance, duration)
-      ) {
-        return alert(
-          'You can only introduce numbers, positive or negative but not empty'
-        );
+      if (!isNumber(distance, duration, elevation) || !isPositive(distance, duration)) {
+        return this._showToast('Inputs have to be valid numbers.');
       }
-      //create the instance
       workout = new Cycling(distance, duration, [lat, lng], elevation);
     }
+
     this.#workouts.push(workout);
     //draw the marker
     this._renderWorkoutMarker(workout);
@@ -190,9 +241,8 @@ class App {
     this._hideForm();
     //save data into local storage
     this._saveData();
-
-    console.log(this.#map);
   }
+
   _renderWorkoutMarker(workout) {
     L.marker(workout.coords)
       .addTo(this.#map)
@@ -210,6 +260,7 @@ class App {
       )
       .openPopup();
   }
+
   _renderWorkout(workout) {
     let html = `
         <li class="workout workout--${workout.type}" data-id="${workout.id}">
@@ -259,6 +310,7 @@ class App {
     }
     form.insertAdjacentHTML('afterend', html);
   }
+
   _moveToPopup(e) {
     const workoutEl = e.target.closest('.workout');
     if (!workoutEl) return;
@@ -272,9 +324,11 @@ class App {
       },
     });
   }
+
   _saveData() {
     localStorage.setItem('workouts', JSON.stringify(this.#workouts));
   }
+
   _loadData() {
     const data = JSON.parse(localStorage.getItem('workouts'));
 
@@ -285,9 +339,11 @@ class App {
       this._renderWorkout(work);
     });
   }
+
   reset() {
     localStorage.removeItem('workouts');
     location.reload();
   }
 }
+
 new App();
