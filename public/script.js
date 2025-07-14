@@ -44,7 +44,7 @@ class Workout {
       'November',
       'December',
     ];
-    this.workoutDate = `${this.type[0].toUpperCase()}${this.type.slice(1)} on ${months[this.date.getMonth()]} ${this.date.getDate()}, ${this.date.getFullYear()}`;
+    this.workoutDate = `${this.distance}km, ${this.duration}m - ${months[this.date.getMonth()]} ${this.date.getDate()}, ${this.date.getFullYear()}`;
   }
   addClick() {
     this.clicks++;
