@@ -288,7 +288,7 @@ class App {
       .addTo(this.#map)
       .bindPopup(
         L.popup({
-          maxWidth: 300,
+          maxWidth: 400,
           minWidth: 100,
           autoClose: false,
           closeOnClick: false,

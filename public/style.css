@@ -27,11 +27,31 @@ body {
   line-height: 1.6;
   height: 100vh;
   overscroll-behavior-y: none;
-
   background-color: #fff;
   padding: 2.5rem;
-
   display: flex;
+  position: relative;
+}
+
+.footer {
+  position: absolute;
+  bottom: calc((2.5rem - 1.2rem)/2);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1001;
+  font-size: 1.2rem;
+  line-height: 1.2rem;
+  margin-top: auto;
+  text-align: center;
+}
+
+.github-link {
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.github-link:hover {
+  color: var(--color-dark--2);
 }
 
 /* GENERAL */
@@ -257,6 +277,12 @@ a:visited {
 .logo {
   height: 5.2rem;
   margin-bottom: 0;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
 }
 
 .popover-container {
