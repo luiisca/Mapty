@@ -33,4 +33,4 @@ This will start a development server, and you can view the application in your b
 
 ## 🌐 Demo
 
-https://github.com/luiisca/TrekTrack
+http://trektrack.luiisca.workers.dev
