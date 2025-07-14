@@ -74,8 +74,9 @@ a:visited {
   cursor: pointer;
 
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr 1fr auto;
   gap: 0.75rem 1.5rem;
+  align-items: center;
 }
 
 .workout--running {
@@ -89,7 +90,7 @@ a:visited {
 .workout__title {
   font-size: 1.7rem;
   font-weight: 600;
-  grid-column: 1 / -1;
+  grid-column: 1 / -2;
 }
 
 .workout__details {
@@ -113,6 +114,26 @@ a:visited {
   color: var(--color-light--1);
   text-transform: uppercase;
   font-weight: 800;
+}
+
+.workout__delete-btn {
+  grid-column: 5 / 6;
+  grid-row: 1 / 2;
+  justify-self: end;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.workout__delete-btn svg {
+  stroke: var(--color-light--1);
+  width: 2rem;
+  height: 2rem;
+  transition: all 0.2s;
+}
+
+.workout__delete-btn:hover svg {
+  stroke: var(--color-brand--1);
 }
 
 .form {

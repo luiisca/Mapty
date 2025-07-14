@@ -5,6 +5,7 @@ const popover = document.querySelector('.popover');
 const toast = document.querySelector('.toast');
 const form = document.querySelector('.form');
 const containerWorkouts = document.querySelector('.workouts');
+const workoutDeleteBtn = document.querySelector('.workout__delete')
 const inputType = document.querySelector('.form__input--type');
 const inputDistance = document.querySelector('.form__input--distance');
 const inputDuration = document.querySelector('.form__input--duration');
@@ -108,10 +109,17 @@ class App {
     locationBttn.addEventListener('click', this._getPosition.bind(this));
     form.addEventListener('submit', this._newWorkout.bind(this));
     inputType.addEventListener('change', this._toggleElevationField);
-    containerWorkouts.addEventListener('click', this._moveToPopup.bind(this));
-
+    containerWorkouts.addEventListener('click', this._handleWorkoutClick.bind(this));
   }
 
+  _handleWorkoutClick(e) {
+    const deleteBtn = e.target.closest('.workout__delete-btn');
+    if (deleteBtn) {
+      this._deleteWorkout(e);
+    } else {
+      this._moveToPopup(e);
+    }
+  }
   _updateHistory() {
     if (COORDS.length > 0) {
       window.history.pushState({}, "", `@${COORDS[0]},${COORDS[1]}`);
@@ -274,7 +282,7 @@ class App {
     * @param {Workout} workout
     */
   _renderWorkoutMarker(workout) {
-    L.marker(workout.coords)
+    L.marker(workout.coords, { workoutId: workout.id })
       .addTo(this.#map)
       .bindPopup(
         L.popup({
@@ -294,6 +302,7 @@ class App {
     * @param {L.Marker} marker
     */
   _updateWorkoutMarker(workout, marker) {
+    marker.options.workoutId = workout.id;
     marker.bindPopup(
       L.popup({
         maxWidth: 250,
@@ -311,6 +320,9 @@ class App {
     let html = `
         <li class="workout workout--${workout.type}" data-id="${workout.id}">
           <h2 class="workout__title">${workout.cardTitle}</h2>
+          <button class="workout__delete-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-icon lucide-trash"><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          </button>
           <div class="workout__details">
             <span class="workout__icon">${workout.type === 'running' ? '🏃‍♂️' : '🚴‍♀️'
       }</span>
@@ -369,6 +381,29 @@ class App {
         duration: 1,
       },
     });
+  }
+
+  _deleteWorkout(e) {
+    const workoutEl = e.target.closest('.workout');
+    if (!workoutEl) return;
+
+    const workoutId = workoutEl.dataset.id;
+
+    // Remove workout from array
+    this.#workouts = this.#workouts.filter(work => work.id !== workoutId);
+
+    // Remove workout from UI
+    workoutEl.remove();
+
+    // Remove marker from map
+    this.#map.eachLayer(layer => {
+      if (layer.options && layer.options.workoutId === workoutId) {
+        this.#map.removeLayer(layer);
+      }
+    });
+
+    // Update local storage
+    this._saveData();
   }
 
   _saveData() {
