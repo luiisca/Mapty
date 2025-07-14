@@ -39,8 +39,7 @@ class Workout {
       'November',
       'December',
     ];
-    this.workoutDate = `${this.type[0].toUpperCase()}${this.type.slice(1)} on ${months[this.date.getMonth()]
-      } ${this.date.getDay()}`;
+    this.workoutDate = `${this.type[0].toUpperCase()}${this.type.slice(1)} on ${months[this.date.getMonth()]} ${this.date.getDate()}, ${this.date.getFullYear()}`;
   }
   addClick() {
     this.clicks++;
@@ -184,6 +183,7 @@ class App {
   }
 
   _showForm(mapE) {
+    // TODO: fails to focus after first load
     inputDistance.focus();
     this.#mapEvent = mapE;
     form.classList.remove('hidden');
