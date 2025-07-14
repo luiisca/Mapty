@@ -89,6 +89,8 @@ class App {
   #latestMarker;
 
   constructor() {
+    this._loadData();
+
     this._updateHistory();
     this._loadMap.bind(this)();
     this._setInitialPopover();
@@ -98,7 +100,6 @@ class App {
     inputType.addEventListener('change', this._toggleElevationField);
     containerWorkouts.addEventListener('click', this._moveToPopup.bind(this));
 
-    this._loadData();
   }
 
   _updateHistory() {
