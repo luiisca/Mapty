@@ -19,6 +19,11 @@ class Workout {
   date = new Date();
   workoutDate;
   clicks = 0;
+  /**
+    * @param {number} distance
+    * @param {number} duration
+    * @param {[number, number]} coords
+    */
   constructor(distance, duration, coords) {
     this.distance = distance;
     this.duration = duration;
@@ -81,6 +86,7 @@ class App {
   #coords = COORDS;
   #zoomLevelPopup = 13;
   #pulsateInterval;
+  #latestMarker;
 
   constructor() {
     this._updateHistory();
@@ -160,13 +166,22 @@ class App {
       attribution:
         '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     }).addTo(this.#map);
-    this.#map.on('click', this._showForm.bind(this));
+    this.#map.on('click', this._handleMapClick.bind(this));
 
     if (this.#workouts) {
       this.#workouts.forEach(work => {
         this._renderWorkoutMarker(work);
       });
     }
+  }
+  _handleMapClick(mapE) {
+    if (this.#latestMarker) {
+      this.#latestMarker.remove();
+    }
+    this.#latestMarker = L.marker([mapE.latlng.lat, mapE.latlng.lng])
+      .addTo(this.#map)
+
+    this._showForm(mapE)
   }
 
   /**
@@ -184,9 +199,9 @@ class App {
 
   _showForm(mapE) {
     // TODO: fails to focus after first load
+    form.classList.remove('hidden');
     inputDistance.focus();
     this.#mapEvent = mapE;
-    form.classList.remove('hidden');
   }
 
   _hideForm() {
@@ -233,8 +248,9 @@ class App {
     }
 
     this.#workouts.push(workout);
-    //draw the marker
-    this._renderWorkoutMarker(workout);
+    //update latest marker
+    this._updateWorkoutMarker(workout, this.#latestMarker);
+    this.#latestMarker = null; // resets latest marker to avoid removing it in _handleMapClick
     //create new workout boxes
     this._renderWorkout(workout);
     //hide the form
@@ -243,6 +259,9 @@ class App {
     this._saveData();
   }
 
+  /**
+    * @param {Workout} workout
+    */
   _renderWorkoutMarker(workout) {
     L.marker(workout.coords)
       .addTo(this.#map)
@@ -255,6 +274,26 @@ class App {
           className: `${workout.type}-popup`,
         })
       )
+      .setPopupContent(
+        `${workout.type === 'running' ? '🏃‍♂️' : '🚴‍♀️'}${workout.workoutDate}`
+      )
+      .openPopup();
+  }
+
+  /**
+    * @param {Workout} workout
+    * @param {L.Marker} marker
+    */
+  _updateWorkoutMarker(workout, marker) {
+    marker.bindPopup(
+      L.popup({
+        maxWidth: 250,
+        minWidth: 100,
+        autoClose: false,
+        closeOnClick: false,
+        className: `${workout.type}-popup`,
+      })
+    )
       .setPopupContent(
         `${workout.type === 'running' ? '🏃‍♂️' : '🚴‍♀️'}${workout.workoutDate}`
       )
