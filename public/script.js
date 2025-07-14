@@ -5,7 +5,7 @@ const popover = document.querySelector('.popover');
 const toast = document.querySelector('.toast');
 const form = document.querySelector('.form');
 const containerWorkouts = document.querySelector('.workouts');
-const workoutDeleteBtn = document.querySelector('.workout__delete')
+const ctaContainer = document.querySelector('.cta-container');
 const inputType = document.querySelector('.form__input--type');
 const inputDistance = document.querySelector('.form__input--distance');
 const inputDuration = document.querySelector('.form__input--duration');
@@ -101,6 +101,7 @@ class App {
 
   constructor() {
     this._loadData();
+    this._updateCtaVisibility();
 
     this._updateHistory();
     this._loadMap.bind(this)();
@@ -276,6 +277,7 @@ class App {
     this._hideForm();
     //save data into local storage
     this._saveData();
+    this._updateCtaVisibility();
   }
 
   /**
@@ -404,6 +406,15 @@ class App {
 
     // Update local storage
     this._saveData();
+    this._updateCtaVisibility();
+  }
+
+  _updateCtaVisibility() {
+    if (this.#workouts.length === 0) {
+      ctaContainer.classList.remove('hidden');
+    } else {
+      ctaContainer.classList.add('hidden');
+    }
   }
 
   _saveData() {

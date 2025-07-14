@@ -346,3 +346,16 @@ a:visited {
     transform: scale(1);
   }
 }
+
+.cta-container {
+  text-align: center;
+  padding: 2rem;
+  background-color: var(--color-dark--2);
+  border-radius: 5px;
+  margin-bottom: 1.75rem;
+}
+
+.cta-text {
+  font-size: 1.6rem;
+  color: var(--color-light--1);
+}
